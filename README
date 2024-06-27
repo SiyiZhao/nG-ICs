@@ -1,0 +1,5 @@
+# non-Gaussian Initial Conditions (nG-ICs)
+
+This repository contains the code for generating non-Gaussian initial conditions (nG-ICs) for cosmological simulations.
+
+We first try code from https://cosmo.nyu.edu/roman/2LPT/ to generate local nG-ICs. 
