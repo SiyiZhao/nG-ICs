@@ -27,32 +27,40 @@ OPT   +=  -DNO64BITID     # switch this on if you want normal 32-bit IDs
 
 #OPT += -DONLY_GAUSSIAN # shwich this if you want gaussian initial conditions (fnl otherwise) 
 
-#OPT += -DLOCAL_FNL #switch this if you want only local non-gaussianities
+OPT += -DLOCAL_FNL #switch this if you want only local non-gaussianities
 
 #OPT += -DEQUIL_FNL #switch this if you want equilateral Fnl
 
-OPT += -DORTOG_FNL #switch this if you want ortogonal Fnl
+# OPT += -DORTOG_FNL #switch this if you want ortogonal Fnl
 
 OPTIONS =  $(OPT)
 
 # ----- Chichipio/astro values ---- 
 #
-GSL_INCL= -I/usr/local/gsl_gcc_mpi/include
-GSL_LIBS= -L/usr/local/gsl_gcc_mpi/lib
-FFTW_INCL= -I/usr/local/fftw_gcc/include
-FFTW_LIBS= -L/usr/local/fftw_gcc/lib
+# GSL_INCL= -I/usr/local/gsl_gcc_mpi/include
+# GSL_LIBS= -L/usr/local/gsl_gcc_mpi/lib
+# FFTW_INCL= -I/usr/local/fftw_gcc/include
+# FFTW_LIBS= -L/usr/local/fftw_gcc/lib
 
-CC       =  /usr/local/mpich_gcc/bin/mpicc #-g -Wall -fbounds-check    # sets the C-compiler (default)
-MPICHLIB = -L/usr/local/mpich_gcc/lib
+# CC       =  /usr/local/mpich_gcc/bin/mpicc #-g -Wall -fbounds-check    # sets the C-compiler (default)
+# MPICHLIB = -L/usr/local/mpich_gcc/lib
 
 #CC       =  /usr/local/mpich_intel/bin/mpicc -g -Wall -fbounds-check    # sets the C-compiler (default)
 
+# for sirius:
+GSL_INCL= -I/opt/ohpc/pub/libs/gnu9/gsl/2.7/include
+GSL_LIBS= -L/opt/ohpc/pub/libs/gnu9/gsl/2.7/lib
+FFTW_INCL= -I/opt/ohpc/pub/libs/gnu9/mpich/fftw/3.3.8/include
+FFTW_LIBS= -L/opt/ohpc/pub/libs/gnu9/mpich/fftw/3.3.8/lib
+CC      = mpicc
+MPICHLIB = -L/opt/ohpc/pub/libs/gnu9/mpich/boost/1.76.0/lib
 # -----------------------------------
 
 OPTIMIZE =   -O3 -Wall    # optimization and warning flags (default)
 
 
-FFTW_LIB =  $(FFTW_LIBS) -ldrfftw_mpi -ldfftw_mpi -ldrfftw -ldfftw
+# FFTW_LIB =  $(FFTW_LIBS) -ldrfftw_mpi -ldfftw_mpi -ldrfftw -ldfftw
+FFTW_LIB =  $(FFTW_LIBS) -lfftw3_mpi -lfftw3
 
 LIBS   =   -lm  $(MPICHLIB)  $(FFTW_LIB)  $(GSL_LIBS)  -lgsl -lgslcblas
 

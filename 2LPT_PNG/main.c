@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <drfftw_mpi.h>
+#include <fftw3-mpi.h>
 #include <mpi.h>
 #include <gsl/gsl_rng.h>
 
@@ -106,24 +106,24 @@ void displacement_fields(void)
   unsigned int bytes, nmesh3;
   int coord;
   fftw_complex *(cdisp[3]), *(cdisp2[3]) ; /* ZA and 2nd order displacements */
-  fftw_real *(disp[3]), *(disp2[3]) ;
+  double *(disp[3]), *(disp2[3]) ;
 
   fftw_complex *(cdigrad[6]);
-  fftw_real *(digrad[6]);
+  double *(digrad[6]);
 
   fftw_complex *(cpot);  /* For computing nongaussian fnl ic */
-  fftw_real *(pot);
+  double *(pot);
 
   fftw_complex *(cpartpot); /* For non-local fluctuations */
-  fftw_real *(partpot);
+  double *(partpot);
   fftw_complex *(cp1p2p3sym);
-  fftw_real *(p1p2p3sym);
+  double *(p1p2p3sym);
   fftw_complex *(cp1p2p3sca);
-  fftw_real *(p1p2p3sca);
+  double *(p1p2p3sca);
   fftw_complex *(cp1p2p3nab);
-  fftw_real *(p1p2p3nab);
+  double *(p1p2p3nab);
   fftw_complex *(cp1p2p3tre);
-  fftw_real *(p1p2p3tre);
+  double *(p1p2p3tre);
 
 
   /**** only to print phi(x) when testing ***/
@@ -200,8 +200,8 @@ void displacement_fields(void)
 
   for(axes=0,bytes=0; axes < 3; axes++)
     {
-      cdisp[axes] = (fftw_complex *) malloc(bytes += sizeof(fftw_real) * TotalSizePlusAdditional);
-      disp[axes] = (fftw_real *) cdisp[axes];
+      cdisp[axes] = (fftw_complex *) malloc(bytes += sizeof(double) * TotalSizePlusAdditional);
+      disp[axes] = (double *) cdisp[axes];
     }
 
   ASSERT_ALLOC(cdisp[0] && cdisp[1] && cdisp[2]);
@@ -223,8 +223,8 @@ void displacement_fields(void)
 	  for(k = 0; k <= Nmesh / 2; k++)
 	    for(axes = 0; axes < 3; axes++)
 	      {
-		cdisp[axes][(i * Nmesh + j) * (Nmesh / 2 + 1) + k].re = 0;
-		cdisp[axes][(i * Nmesh + j) * (Nmesh / 2 + 1) + k].im = 0;
+		cdisp[axes][(i * Nmesh + j) * (Nmesh / 2 + 1) + k][0] = 0;
+		cdisp[axes][(i * Nmesh + j) * (Nmesh / 2 + 1) + k][1] = 0;
 	      }
 
   if(ThisTask == 0 ) printf("\n hera C\n");
@@ -299,9 +299,9 @@ void displacement_fields(void)
 			  if(i >= Local_x_start && i < (Local_x_start + Local_nx))
 			    for(axes = 0; axes < 3; axes++)
 			      {
-				cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k].re =
+				cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k][0] =
 				  -kvec[axes] / kmag2 * delta * sin(phase);
-				cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k].im =
+				cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k][1] =
 				  kvec[axes] / kmag2 * delta * cos(phase);
 			      }
 			}
@@ -319,14 +319,14 @@ void displacement_fields(void)
 				      
 				      for(axes = 0; axes < 3; axes++)
 					{
-					  cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k].re =
+					  cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k][0] =
 					    -kvec[axes] / kmag2 * delta * sin(phase);
-					  cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k].im =
+					  cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k][1] =
 					    kvec[axes] / kmag2 * delta * cos(phase);
 					  
-					  cdisp[axes][((i - Local_x_start) * Nmesh + jj) * (Nmesh / 2 + 1) + k].re =
+					  cdisp[axes][((i - Local_x_start) * Nmesh + jj) * (Nmesh / 2 + 1) + k][0] =
 					    -kvec[axes] / kmag2 * delta * sin(phase);
-					  cdisp[axes][((i - Local_x_start) * Nmesh + jj) * (Nmesh / 2 + 1) + k].im =
+					  cdisp[axes][((i - Local_x_start) * Nmesh + jj) * (Nmesh / 2 + 1) + k][1] =
 					    -kvec[axes] / kmag2 * delta * cos(phase);
 					}
 				    }
@@ -348,9 +348,9 @@ void displacement_fields(void)
 				  if(i >= Local_x_start && i < (Local_x_start + Local_nx))
 				    for(axes = 0; axes < 3; axes++)
 				      {
-					cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k].re =
+					cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k][0] =
 					  -kvec[axes] / kmag2 * delta * sin(phase);
-					cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k].im =
+					cdisp[axes][((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k][1] =
 					  kvec[axes] / kmag2 * delta * cos(phase);
 				      }
 				  
@@ -358,9 +358,9 @@ void displacement_fields(void)
 				    for(axes = 0; axes < 3; axes++)
 				      {
 					cdisp[axes][((ii - Local_x_start) * Nmesh + jj) * (Nmesh / 2 + 1) +
-					      k].re = -kvec[axes] / kmag2 * delta * sin(phase);
+					      k][0] = -kvec[axes] / kmag2 * delta * sin(phase);
 					cdisp[axes][((ii - Local_x_start) * Nmesh + jj) * (Nmesh / 2 + 1) +
-					      k].im = -kvec[axes] / kmag2 * delta * cos(phase);
+					      k][1] = -kvec[axes] / kmag2 * delta * cos(phase);
 				      }
 				}
 			    } 
@@ -382,8 +382,10 @@ void displacement_fields(void)
 
 
       bytes=0; /*initialize*/
-      cpot = (fftw_complex *) malloc(bytes += sizeof(fftw_real) * TotalSizePlusAdditional);
-      pot = (fftw_real *) cpot;
+      cpot = (fftw_complex *) malloc(bytes += sizeof(double) * TotalSizePlusAdditional);
+      pot = (double *) cpot;
+      // cpot = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * TotalSizePlusAdditional);
+      // pot = (double*) fftw_malloc(sizeof(double) * TotalSize);
 
       ASSERT_ALLOC(cpot);
 
@@ -393,8 +395,8 @@ void displacement_fields(void)
         for(j = 0; j < Nmesh; j++)
           for(k = 0; k <= Nmesh / 2; k++)
               {
-                cpot[(i * Nmesh + j) * (Nmesh / 2 + 1) + k].re = 0;
-                cpot[(i * Nmesh + j) * (Nmesh / 2 + 1) + k].im = 0;
+                cpot[(i * Nmesh + j) * (Nmesh / 2 + 1) + k][0] = 0;
+                cpot[(i * Nmesh + j) * (Nmesh / 2 + 1) + k][1] = 0;
               }
 
 
@@ -470,8 +472,8 @@ void displacement_fields(void)
 
                                 coord = ((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k;
 
-                                cpot[coord].re = phig * sin(phase);
-                                cpot[coord].im = - phig * cos(phase);
+                                cpot[coord][0] = phig * sin(phase);
+                                cpot[coord][1] = - phig * cos(phase);
 
                                }
                         }
@@ -489,13 +491,13 @@ void displacement_fields(void)
 
                                           coord = ((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k;
 
-                                          cpot[coord].re =  phig * sin(phase);
-                                          cpot[coord].im = - phig * cos(phase);
+                                          cpot[coord][0] =  phig * sin(phase);
+                                          cpot[coord][1] = - phig * cos(phase);
 
 
                                           coord = ((i - Local_x_start) * Nmesh + jj) * (Nmesh / 2 + 1) + k; 
-                                          cpot[coord].re = phig * sin(phase);
-                                          cpot[coord].im = phig * cos(phase);
+                                          cpot[coord][0] = phig * sin(phase);
+                                          cpot[coord][1] = phig * cos(phase);
 
                                     }
                                 }
@@ -518,16 +520,16 @@ void displacement_fields(void)
 
                                         coord = ((i - Local_x_start) * Nmesh + j) * (Nmesh / 2 + 1) + k;
           
-                                        cpot[coord].re = phig * sin(phase);
-                                        cpot[coord].im = - phig * cos(phase);
+                                        cpot[coord][0] = phig * sin(phase);
+                                        cpot[coord][1] = - phig * cos(phase);
 
                                       }
                                   if(ii >= Local_x_start && ii < (Local_x_start + Local_nx))
                                       {
                                         coord = ((ii - Local_x_start) * Nmesh + jj) * (Nmesh / 2 + 1) + k;
 
-                                        cpot[coord].re = phig * sin(phase);
-                                        cpot[coord].im = phig * cos(phase);
+                                        cpot[coord][0] = phig * sin(phase);
+                                        cpot[coord][1] = phig * cos(phase);
 
                                       }
                                 }
@@ -547,7 +549,8 @@ void displacement_fields(void)
       /******* LOCAL PRIMORDIAL POTENTIAL ************/
 
       if(ThisTask == 0) printf("Fourier transforming initial potential to configuration...");
-      rfftwnd_mpi(Inverse_plan, 1, pot, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Inverse_plan, 1, pot, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_c2r(Inverse_plan, cpot, pot);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
 
@@ -566,7 +569,8 @@ void displacement_fields(void)
       MPI_Barrier(MPI_COMM_WORLD);
 
       if(ThisTask == 0) printf("Fourier transforming squared potential ...");
-      rfftwnd_mpi(Forward_plan, 1, pot, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Forward_plan, 1, pot, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_r2c(Forward_plan, pot, cpot);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
    
@@ -578,39 +582,39 @@ void displacement_fields(void)
           for(k = 0; k <= Nmesh / 2 ; k++)
             {
               coord = (i * Nmesh + j) * (Nmesh / 2 + 1) + k;
-              cpot[coord].re /= (double) nmesh3; 
-              cpot[coord].im /= (double) nmesh3; 
+              cpot[coord][0] /= (double) nmesh3; 
+              cpot[coord][1] /= (double) nmesh3; 
             }
         
        if(ThisTask == 0) {
-              cpot[0].re=0.;
-              cpot[0].im=0.; 
+              cpot[0][0]=0.;
+              cpot[0][1]=0.; 
            }
 
-
+// have not transfer to fftw3 correctlly!!!!!
 #else
       /**** NON-LOCAL PRIMORDIAL POTENTIAL **************/ 
 
           /* allocate partpotential */
 	
-	  cpartpot = (fftw_complex *) malloc(bytes = sizeof(fftw_real) * TotalSizePlusAdditional);
-	  partpot = (fftw_real *) cpartpot;
+	  cpartpot = (fftw_complex *) malloc(bytes = sizeof(double) * TotalSizePlusAdditional);
+	  partpot = (double *) cpartpot;
 	  ASSERT_ALLOC(cpartpot);
 
-	  cp1p2p3sym = (fftw_complex *) malloc(bytes = sizeof(fftw_real) * TotalSizePlusAdditional);
-	  p1p2p3sym = (fftw_real *) cp1p2p3sym;
+	  cp1p2p3sym = (fftw_complex *) malloc(bytes = sizeof(double) * TotalSizePlusAdditional);
+	  p1p2p3sym = (double *) cp1p2p3sym;
 	  ASSERT_ALLOC(cp1p2p3sym);
 
-	  cp1p2p3sca = (fftw_complex *) malloc(bytes = sizeof(fftw_real) * TotalSizePlusAdditional);
-	  p1p2p3sca = (fftw_real *) cp1p2p3sca;
+	  cp1p2p3sca = (fftw_complex *) malloc(bytes = sizeof(double) * TotalSizePlusAdditional);
+	  p1p2p3sca = (double *) cp1p2p3sca;
 	  ASSERT_ALLOC(cp1p2p3sca);
 
-	  cp1p2p3nab = (fftw_complex *) malloc(bytes = sizeof(fftw_real) * TotalSizePlusAdditional);
-	  p1p2p3nab = (fftw_real *) cp1p2p3nab;
+	  cp1p2p3nab = (fftw_complex *) malloc(bytes = sizeof(double) * TotalSizePlusAdditional);
+	  p1p2p3nab = (double *) cp1p2p3nab;
 	  ASSERT_ALLOC(cp1p2p3nab);
 
-     	  cp1p2p3tre = (fftw_complex *) malloc(bytes = sizeof(fftw_real) * TotalSizePlusAdditional);
-	  p1p2p3tre = (fftw_real *) cp1p2p3tre;
+     	  cp1p2p3tre = (fftw_complex *) malloc(bytes = sizeof(double) * TotalSizePlusAdditional);
+	  p1p2p3tre = (double *) cp1p2p3tre;
 	  ASSERT_ALLOC(cp1p2p3tre);
 
 
@@ -620,16 +624,16 @@ void displacement_fields(void)
 	  for(k = 0; k <= Nmesh / 2; k++)
 	      {
 		coord = (i * Nmesh + j) * (Nmesh / 2 + 1) + k;
-		cp1p2p3sym[coord].re = 0;
-		cp1p2p3sym[coord].im = 0;
-		cp1p2p3sca[coord].re = 0;
-		cp1p2p3sca[coord].im = 0;
-                cp1p2p3nab[coord].re = 0;
-                cp1p2p3nab[coord].im = 0;
-                cp1p2p3tre[coord].re = 0;
-                cp1p2p3tre[coord].im = 0;
-		cpartpot[coord].re = 0;
-		cpartpot[coord].im = 0;
+		cp1p2p3sym[coord][0] = 0;
+		cp1p2p3sym[coord][1] = 0;
+		cp1p2p3sca[coord][0] = 0;
+		cp1p2p3sca[coord][1] = 0;
+                cp1p2p3nab[coord][0] = 0;
+                cp1p2p3nab[coord][1] = 0;
+                cp1p2p3tre[coord][0] = 0;
+                cp1p2p3tre[coord][1] = 0;
+		cpartpot[coord][0] = 0;
+		cpartpot[coord][1] = 0;
 	      }
 
 
@@ -664,11 +668,11 @@ void displacement_fields(void)
                       kmag2 = kvec[0] * kvec[0] + kvec[1] * kvec[1] + kvec[2] * kvec[2];
                       kmag = sqrt(kmag2);
 
-                      cpartpot[coord].re = kmag * cpot[coord].re;
-                      cpartpot[coord].im = kmag * cpot[coord].im;
+                      cpartpot[coord][0] = kmag * cpot[coord][0];
+                      cpartpot[coord][1] = kmag * cpot[coord][1];
                       
-                      cp1p2p3nab[coord].re = kmag2 * cpot[coord].re;
-                      cp1p2p3nab[coord].im = kmag2 * cpot[coord].im; 
+                      cp1p2p3nab[coord][0] = kmag2 * cpot[coord][0];
+                      cp1p2p3nab[coord][1] = kmag2 * cpot[coord][1]; 
             }
 
        MPI_Barrier(MPI_COMM_WORLD);
@@ -676,19 +680,22 @@ void displacement_fields(void)
        /*furier back to real */
 
       if(ThisTask == 0) printf("Fourier transforming initial potential to configuration...");
-      rfftwnd_mpi(Inverse_plan, 1, pot, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Inverse_plan, 1, pot, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_c2r(Inverse_plan, pot, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
           
 
       if(ThisTask == 0) printf("Fourier transforming partpotential to configuration...");
-      rfftwnd_mpi(Inverse_plan, 1, partpot, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Inverse_plan, 1, partpot, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_c2r(Inverse_plan, partpot, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
 
 
       if(ThisTask == 0) printf("Fourier transforming nabpotential to configuration...");
-      rfftwnd_mpi(Inverse_plan, 1, p1p2p3nab, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Inverse_plan, 1, p1p2p3nab, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_c2r(Inverse_plan, p1p2p3nab, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
 
@@ -715,37 +722,43 @@ void displacement_fields(void)
       MPI_Barrier(MPI_COMM_WORLD);
       
       if(ThisTask == 0) printf("Fourier transforming potential ...");
-      rfftwnd_mpi(Forward_plan, 1, pot, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Forward_plan, 1, pot, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_r2c(Forward_plan, pot, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
           
 
       if(ThisTask == 0) printf("Fourier transforming squared potential ...");
-      rfftwnd_mpi(Forward_plan, 1, partpot, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Forward_plan, 1, partpot, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_r2c(Forward_plan, partpot, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
           
 
       if(ThisTask == 0) printf("Fourier transforming p1p2p3sym potential ...");
-      rfftwnd_mpi(Forward_plan, 1, p1p2p3sym, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Forward_plan, 1, p1p2p3sym, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_r2c(Forward_plan, p1p2p3sym, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
           
 
       if(ThisTask == 0) printf("Fourier transforming p1p2p3sca potential ...");
-      rfftwnd_mpi(Forward_plan, 1, p1p2p3sca, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Forward_plan, 1, p1p2p3sca, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_r2c(Forward_plan, p1p2p3sca, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
           
 
       if(ThisTask == 0) printf("Fourier transforming p1p2p3nab potential ...");
-      rfftwnd_mpi(Forward_plan, 1, p1p2p3nab, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Forward_plan, 1, p1p2p3nab, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_r2c(Forward_plan, p1p2p3nab, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
           
 
       if(ThisTask == 0) printf("Fourier transforming p1p2p3tre potential ...");
-      rfftwnd_mpi(Forward_plan, 1, p1p2p3tre, Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Forward_plan, 1, p1p2p3tre, Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_r2c(Forward_plan, p1p2p3tre, Workspace);
       if(ThisTask == 0) printf("Done.\n");
       fflush(stdout);
           
@@ -788,8 +801,8 @@ void displacement_fields(void)
               
                       if(i == 0 && j == 0 && k == 0)
                         {
-                          cpot[0].re=0.;
-                          cpot[0].im=0.;
+                          cpot[0][0]=0.;
+                          cpot[0][1]=0.;
                           continue;
                         }
                       
@@ -798,27 +811,27 @@ void displacement_fields(void)
 #ifdef EQUIL_FNL
       /* fnl equilateral */
           
-              cpot[coord].re = cpot[coord].re + Fnl * (-3*cpartpot[coord].re - 2*cp1p2p3sym[coord].re / kmag2 + 4*cp1p2p3sca[coord].re /kmag + 2*cp1p2p3nab[coord].re / kmag2);
-              cpot[coord].im = cpot[coord].im + Fnl * (-3*cpartpot[coord].im - 2*cp1p2p3sym[coord].im / kmag2 + 4*cp1p2p3sca[coord].im /kmag + 2*cp1p2p3nab[coord].im / kmag2); 
-              cpot[coord].re /= (double) nmesh3; 
-              cpot[coord].im /= (double) nmesh3; 
+              cpot[coord][0] = cpot[coord][0] + Fnl * (-3*cpartpot[coord][0] - 2*cp1p2p3sym[coord][0] / kmag2 + 4*cp1p2p3sca[coord][0] /kmag + 2*cp1p2p3nab[coord][0] / kmag2);
+              cpot[coord][1] = cpot[coord][1] + Fnl * (-3*cpartpot[coord][1] - 2*cp1p2p3sym[coord][1] / kmag2 + 4*cp1p2p3sca[coord][1] /kmag + 2*cp1p2p3nab[coord][1] / kmag2); 
+              cpot[coord][0] /= (double) nmesh3; 
+              cpot[coord][1] /= (double) nmesh3; 
 
 
 #endif
 
 #ifdef ORTOG_FNL 
 
-              cpot[coord].re = cpot[coord].re + Fnl * (-9*cpartpot[coord].re - 8*cp1p2p3sym[coord].re / kmag2 + 10*cp1p2p3sca[coord].re /kmag + 8*cp1p2p3nab[coord].re / kmag2);
-              cpot[coord].im = cpot[coord].im + Fnl * (-9*cpartpot[coord].im - 8*cp1p2p3sym[coord].im / kmag2 + 10*cp1p2p3sca[coord].im /kmag + 8*cp1p2p3nab[coord].im / kmag2);
-              cpot[coord].re /= (double) nmesh3; 
-              cpot[coord].im /= (double) nmesh3; 
+              cpot[coord][0] = cpot[coord][0] + Fnl * (-9*cpartpot[coord][0] - 8*cp1p2p3sym[coord][0] / kmag2 + 10*cp1p2p3sca[coord][0] /kmag + 8*cp1p2p3nab[coord][0] / kmag2);
+              cpot[coord][1] = cpot[coord][1] + Fnl * (-9*cpartpot[coord][1] - 8*cp1p2p3sym[coord][1] / kmag2 + 10*cp1p2p3sca[coord][1] /kmag + 8*cp1p2p3nab[coord][1] / kmag2);
+              cpot[coord][0] /= (double) nmesh3; 
+              cpot[coord][1] /= (double) nmesh3; 
 
 #endif
 
                       if(i == 0 && j == 0 && k == 0)
                         {
-                          cpot[0].re=0.;
-                          cpot[0].im=0.;
+                          cpot[0][0]=0.;
+                          cpot[0][1]=0.;
                           continue;
                         }
 
@@ -844,8 +857,8 @@ void displacement_fields(void)
 
   for(axes=0,bytes=0; axes < 3; axes++)
     {
-      cdisp[axes] = (fftw_complex *) malloc(bytes += sizeof(fftw_real) * TotalSizePlusAdditional);
-      disp[axes] = (fftw_real *) cdisp[axes];
+      cdisp[axes] = (fftw_complex *) malloc(bytes += sizeof(double) * TotalSizePlusAdditional);
+      disp[axes] = (double *) cdisp[axes];
     }
 
   ASSERT_ALLOC(cdisp[0] && cdisp[1] && cdisp[2]);
@@ -867,8 +880,8 @@ void displacement_fields(void)
 	  for(k = 0; k <= Nmesh / 2; k++)
 	    for(axes = 0; axes < 3; axes++)
 	      {
-		cdisp[axes][(i * Nmesh + j) * (Nmesh / 2 + 1) + k].re = 0;
-		cdisp[axes][(i * Nmesh + j) * (Nmesh / 2 + 1) + k].im = 0;
+		cdisp[axes][(i * Nmesh + j) * (Nmesh / 2 + 1) + k][0] = 0;
+		cdisp[axes][(i * Nmesh + j) * (Nmesh / 2 + 1) + k][1] = 0;
 	      }
 
 
@@ -907,8 +920,8 @@ void displacement_fields(void)
 
                      for(axes = 0; axes < 3; axes++)   
                                         {
-                                cdisp[axes][coord].im = kvec[axes] * twb * cpot[coord].re;
-                                cdisp[axes][coord].re = - kvec[axes] * twb * cpot[coord].im;
+                                cdisp[axes][coord][1] = kvec[axes] * twb * cpot[coord][0];
+                                cdisp[axes][coord][0] = - kvec[axes] * twb * cpot[coord][1];
                                         }
             }
 
@@ -926,8 +939,8 @@ void displacement_fields(void)
 
       for(i = 0; i < 6; i++)
 	{
-	  cdigrad[i] = (fftw_complex *) malloc(bytes = sizeof(fftw_real) * TotalSizePlusAdditional);
-	  digrad[i] = (fftw_real *) cdigrad[i];
+	  cdigrad[i] = (fftw_complex *) malloc(bytes = sizeof(double) * TotalSizePlusAdditional);
+	  digrad[i] = (double *) cdigrad[i];
 	  ASSERT_ALLOC(cdigrad[i]);
 	}
       
@@ -953,28 +966,29 @@ void displacement_fields(void)
 	      
 	      /* Derivatives of ZA displacement  */
 	      /* d(dis_i)/d(q_j)  -> sqrt(-1) k_j dis_i */
-	      cdigrad[0][coord].re = -cdisp[0][coord].im * kvec[0]; /* disp0,0 */
-	      cdigrad[0][coord].im = cdisp[0][coord].re * kvec[0];
+	      cdigrad[0][coord][0] = -cdisp[0][coord][1] * kvec[0]; /* disp0,0 */
+	      cdigrad[0][coord][1] = cdisp[0][coord][0] * kvec[0];
 
-	      cdigrad[1][coord].re = -cdisp[0][coord].im * kvec[1]; /* disp0,1 */
-	      cdigrad[1][coord].im = cdisp[0][coord].re * kvec[1];
+	      cdigrad[1][coord][0] = -cdisp[0][coord][1] * kvec[1]; /* disp0,1 */
+	      cdigrad[1][coord][1] = cdisp[0][coord][0] * kvec[1];
 
-	      cdigrad[2][coord].re = -cdisp[0][coord].im * kvec[2]; /* disp0,2 */
-	      cdigrad[2][coord].im = cdisp[0][coord].re * kvec[2];
+	      cdigrad[2][coord][0] = -cdisp[0][coord][1] * kvec[2]; /* disp0,2 */
+	      cdigrad[2][coord][1] = cdisp[0][coord][0] * kvec[2];
 	      
-	      cdigrad[3][coord].re = -cdisp[1][coord].im * kvec[1]; /* disp1,1 */
-	      cdigrad[3][coord].im = cdisp[1][coord].re * kvec[1];
+	      cdigrad[3][coord][0] = -cdisp[1][coord][1] * kvec[1]; /* disp1,1 */
+	      cdigrad[3][coord][1] = cdisp[1][coord][0] * kvec[1];
 
-	      cdigrad[4][coord].re = -cdisp[1][coord].im * kvec[2]; /* disp1,2 */
-	      cdigrad[4][coord].im = cdisp[1][coord].re * kvec[2];
+	      cdigrad[4][coord][0] = -cdisp[1][coord][1] * kvec[2]; /* disp1,2 */
+	      cdigrad[4][coord][1] = cdisp[1][coord][0] * kvec[2];
 
-	      cdigrad[5][coord].re = -cdisp[2][coord].im * kvec[2]; /* disp2,2 */
-	      cdigrad[5][coord].im = cdisp[2][coord].re * kvec[2];
+	      cdigrad[5][coord][0] = -cdisp[2][coord][1] * kvec[2]; /* disp2,2 */
+	      cdigrad[5][coord][1] = cdisp[2][coord][0] * kvec[2];
 	    }
 
 
       if(ThisTask == 0) printf("Fourier transforming displacement gradient...");
-      for(i = 0; i < 6; i++) rfftwnd_mpi(Inverse_plan, 1, digrad[i], Workspace, FFTW_NORMAL_ORDER);
+      // for(i = 0; i < 6; i++) rfftwnd_mpi(Inverse_plan, 1, digrad[i], Workspace, FFTW_NORMAL_ORDER);
+      for(i = 0; i < 6; i++) fftw_execute_dft_c2r(Inverse_plan, cdigrad[i], digrad[i]);
       if(ThisTask == 0) printf("Done.\n");
 
       /* Compute second order source and store it in digrad[3]*/
@@ -992,7 +1006,8 @@ void displacement_fields(void)
 	    }
 
       if(ThisTask == 0) printf("Fourier transforming second order source...");
-      rfftwnd_mpi(Forward_plan, 1, digrad[3], Workspace, FFTW_NORMAL_ORDER);
+      // rfftwnd_mpi(Forward_plan, 1, digrad[3], Workspace, FFTW_NORMAL_ORDER);
+      fftw_execute_dft_r2c(Forward_plan, digrad[3], cdigrad[3]);
       if(ThisTask == 0) printf("Done.\n");
       
       /* The memory allocated for cdigrad[0], [1], and [2] will be used for 2nd order displacements */
@@ -1001,7 +1016,7 @@ void displacement_fields(void)
       for(axes = 0; axes < 3; axes++) 
 	{
 	  cdisp2[axes] = cdigrad[axes]; 
-	  disp2[axes] = (fftw_real *) cdisp2[axes];
+	  disp2[axes] = (double *) cdisp2[axes];
 	}
 
       free(cdigrad[4]); free(cdigrad[5]); 
@@ -1057,13 +1072,13 @@ void displacement_fields(void)
 		{
 		  if(kmag2 > 0.0) 
 		    {
-		      cdisp2[axes][coord].re = cdigrad[3][coord].im * kvec[axes] / kmag2;
-		      cdisp2[axes][coord].im = -cdigrad[3][coord].re * kvec[axes] / kmag2;
+		      cdisp2[axes][coord][0] = cdigrad[3][coord][1] * kvec[axes] / kmag2;
+		      cdisp2[axes][coord][1] = -cdigrad[3][coord][0] * kvec[axes] / kmag2;
 		    }
-		  else cdisp2[axes][coord].re = cdisp2[axes][coord].im = 0.0;
+		  else cdisp2[axes][coord][0] = cdisp2[axes][coord][1] = 0.0;
 #ifdef CORRECT_CIC
-		  cdisp[axes][coord].re *= smth;   cdisp[axes][coord].im *= smth;
-		  cdisp2[axes][coord].re *= smth;  cdisp2[axes][coord].im *= smth;
+		  cdisp[axes][coord][0] *= smth;   cdisp[axes][coord][1] *= smth;
+		  cdisp2[axes][coord][0] *= smth;  cdisp2[axes][coord][1] *= smth;
 #endif
 		}
 	    }
@@ -1080,8 +1095,10 @@ void displacement_fields(void)
 	{
           if(ThisTask == 0) printf("Fourier transforming displacements, axis %d.\n",axes);
 
-	  rfftwnd_mpi(Inverse_plan, 1, disp[axes], Workspace, FFTW_NORMAL_ORDER);
-	  rfftwnd_mpi(Inverse_plan, 1, disp2[axes], Workspace, FFTW_NORMAL_ORDER);
+	  // rfftwnd_mpi(Inverse_plan, 1, disp[axes], Workspace, FFTW_NORMAL_ORDER);
+    fftw_execute_dft_c2r(Inverse_plan, cdisp[axes], disp[axes]);
+	  // rfftwnd_mpi(Inverse_plan, 1, disp2[axes], Workspace, FFTW_NORMAL_ORDER);
+    fftw_execute_dft_c2r(Inverse_plan, cdisp2[axes], disp2[axes]);
 
 	  /* now get the plane on the right side from neighbour on the right, 
 	     and send the left plane */
@@ -1110,11 +1127,11 @@ void displacement_fields(void)
 	    {
 	      /* send ZA disp */
 	      MPI_Isend(&(disp[axes][0]),
-			sizeof(fftw_real) * Nmesh * (2 * (Nmesh / 2 + 1)),
+			sizeof(double) * Nmesh * (2 * (Nmesh / 2 + 1)),
 			MPI_BYTE, recvTask, 10, MPI_COMM_WORLD, &request);
 	      
 	      MPI_Recv(&(disp[axes][(Local_nx * Nmesh) * (2 * (Nmesh / 2 + 1))]),
-		       sizeof(fftw_real) * Nmesh * (2 * (Nmesh / 2 + 1)),
+		       sizeof(double) * Nmesh * (2 * (Nmesh / 2 + 1)),
 		       MPI_BYTE, sendTask, 10, MPI_COMM_WORLD, &status);
 	      
 	      MPI_Wait(&request, &status);
@@ -1122,11 +1139,11 @@ void displacement_fields(void)
 	      
 	      /* send 2nd order disp */
 	      MPI_Isend(&(disp2[axes][0]),
-			sizeof(fftw_real) * Nmesh * (2 * (Nmesh / 2 + 1)),
+			sizeof(double) * Nmesh * (2 * (Nmesh / 2 + 1)),
 			MPI_BYTE, recvTask, 10, MPI_COMM_WORLD, &request);
 	      
 	      MPI_Recv(&(disp2[axes][(Local_nx * Nmesh) * (2 * (Nmesh / 2 + 1))]),
-		       sizeof(fftw_real) * Nmesh * (2 * (Nmesh / 2 + 1)),
+		       sizeof(double) * Nmesh * (2 * (Nmesh / 2 + 1)),
 		       MPI_BYTE, sendTask, 10, MPI_COMM_WORLD, &status);
 	      
 	      MPI_Wait(&request, &status);
@@ -1268,14 +1285,36 @@ void initialize_ffts(void)
   size_t bytes;
 
 
-  Inverse_plan = rfftw3d_mpi_create_plan(MPI_COMM_WORLD,
-					 Nmesh, Nmesh, Nmesh, FFTW_COMPLEX_TO_REAL, FFTW_ESTIMATE);
+  // Inverse_plan = rfftw3d_mpi_create_plan(MPI_COMM_WORLD,
+	// 				 Nmesh, Nmesh, Nmesh, FFTW_COMPLEX_TO_REAL, FFTW_ESTIMATE);
 
-  Forward_plan = rfftw3d_mpi_create_plan(MPI_COMM_WORLD,
-					 Nmesh, Nmesh, Nmesh, FFTW_REAL_TO_COMPLEX, FFTW_ESTIMATE);
+  // Forward_plan = rfftw3d_mpi_create_plan(MPI_COMM_WORLD,
+	// 				 Nmesh, Nmesh, Nmesh, double_TO_COMPLEX, FFTW_ESTIMATE);
 
-  rfftwnd_mpi_local_sizes(Forward_plan, &Local_nx, &Local_x_start,
-			  &local_ny_after_transpose, &local_y_start_after_transpose, &total_size);
+  // rfftwnd_mpi_local_sizes(Forward_plan, &Local_nx, &Local_x_start,
+	// 		  &local_ny_after_transpose, &local_y_start_after_transpose, &total_size);
+
+  // fftw3:
+  // 初始化FFTW3 MPI
+  fftw_mpi_init();
+
+  // 计算局部尺寸并分配内存
+  ptrdiff_t alloc_local = fftw_mpi_local_size_3d(Nmesh, Nmesh, Nmesh/2+1, MPI_COMM_WORLD, &Local_nx, &Local_x_start);
+
+// alloc_local 是本地进程上为了存储输入/输出数组而需要分配的最大尺寸
+// local_n0 是在第一个维度上本地数组的尺寸
+// local_0_start 是在第一个维度上本地数组的起始位置
+
+  Workspace = (fftw_complex*) fftw_alloc_complex(alloc_local);
+  ASSERT_ALLOC(Workspace)
+
+  // 创建正向FFT计划
+  Forward_plan = fftw_mpi_plan_dft_r2c_3d(Nmesh, Nmesh, Nmesh, (double*)Workspace, Workspace, MPI_COMM_WORLD, FFTW_ESTIMATE);
+
+  // 创建逆向FFT计划
+  Inverse_plan = fftw_mpi_plan_dft_c2r_3d(Nmesh, Nmesh, Nmesh, Workspace, (double*)Workspace, MPI_COMM_WORLD, FFTW_ESTIMATE);
+
+
 
   Local_nx_table = malloc(sizeof(int) * NTask);
   MPI_Allgather(&Local_nx, 1, MPI_INT, Local_nx_table, 1, MPI_INT, MPI_COMM_WORLD);
@@ -1307,8 +1346,6 @@ void initialize_ffts(void)
 
   TotalSizePlusAdditional = total_size + additional;
 
-  Workspace = (fftw_real *) malloc(bytes = sizeof(fftw_real) * total_size);
-
   ASSERT_ALLOC(Workspace)
 
 }
@@ -1319,8 +1356,11 @@ void free_ffts(void)
 {
   free(Workspace);
   free(Slab_to_task);
-  rfftwnd_mpi_destroy_plan(Inverse_plan);
-  rfftwnd_mpi_destroy_plan(Forward_plan);
+  // rfftwnd_mpi_destroy_plan(Inverse_plan);
+  // rfftwnd_mpi_destroy_plan(Forward_plan);
+  // FFTW3
+  fftw_destroy_plan(Inverse_plan); 
+  fftw_destroy_plan(Forward_plan);
 }
 
 

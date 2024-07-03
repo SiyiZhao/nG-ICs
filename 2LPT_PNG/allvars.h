@@ -1,4 +1,4 @@
-#include <drfftw_mpi.h>
+#include <fftw3-mpi.h>
 
 #define  PI          3.14159265358979323846 
 #define  GRAVITY     6.672e-8
@@ -111,10 +111,12 @@ extern int      Local_nx, Local_x_start;
 extern int  IdStart;
 
 extern unsigned int TotalSizePlusAdditional;
-extern rfftwnd_mpi_plan Inverse_plan;
-extern rfftwnd_mpi_plan Forward_plan;
-//extern fftw_real        *Disp;
-extern fftw_real        *Workspace;
+// extern rfftwnd_mpi_plan Inverse_plan;
+// extern rfftwnd_mpi_plan Forward_plan;
+extern fftw_plan Inverse_plan;
+extern fftw_plan Forward_plan;
+//extern double        *Disp;
+extern double        *Workspace;
 //extern fftw_complex     *Cdata;
 
 
