@@ -17,9 +17,9 @@ Nsample       280          % sets the maximum k that the code uses,
 Box             1200.0    % Periodic box size of simulation
 
 FileBase         ics_nonlocal_test          % Base-filename of output files
-OutputDir        /export/chichipio2/mm3812/NBody/output  % Directory for output
+OutputDir        /hscratch/siyizhao/ICs  % Directory for output
 
-GlassFile        /export/chichipio2/mm3812/NBody/inputs/glass1_le 
+GlassFile        /home/siyizhao/nG-ICs/inputs/glass1_le 
 GlassTileFac   280        % Unless you know better, set it equal to Nmesh=Nsample 
 
 
@@ -52,7 +52,7 @@ WhichSpectrum    0         % "1" selects Eisenstein & Hu spectrum,
                            % Non-Gaussian case requires "0" value,i.e, using Tranfer Function 
 
                   
-FileWithInputSpectrum    /export/chichipio2/mm3812/NBody/inputs/input_spectrum.dat 
+FileWithInputSpectrum    /home/siyizhao/nG-ICs/inputs/input_spectrum.dat 
                                                                          % filename of tabulated input
                                                                          % expecting logk logDk 
                                                                          % Dk is the dimentionless power spectrum 
@@ -76,7 +76,7 @@ WhichTransfer    2        % "1" selects EH Transfer function
                           % For NonLocal Models set WhithSpectrum = 0 and 
 
 
-FileWithInputTransfer     /export/chichipio2/mm3812/NBody/inputs/input_transfer.dat  
+FileWithInputTransfer     /home/siyizhao/nG-ICs/inputs/input_transfer.dat  
                                                             % now input is k ad T, program normalizes.  
 
 Seed             5001    %  Seed for IC-generator
