@@ -1,2 +1,4 @@
 *.o
 *.log
+read_data/read_glass.c
+read_data/read_glass
