@@ -17,7 +17,7 @@ Nsample       280          % sets the maximum k that the code uses,
 Box             1200.0    % Periodic box size of simulation, Mpc/h
 
 FileBase         ics_nonlocal_test          % Base-filename of output files
-OutputDir        /hscratch/siyizhao/ICs  % Directory for output
+OutputDir        /hscratch/siyizhao/ICs/test  % Directory for output
 
 GlassFile        /home/siyizhao/nG-ICs/inputs/glass1_le 
 GlassTileFac   280        % Unless you know better, set it equal to Nmesh=Nsample 
