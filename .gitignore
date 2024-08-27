@@ -1,5 +1,6 @@
 *.o
 *.log
+*/LOG/*
 read_data/read_glass.c
 read_data/read_glass
 .vscode/settings.json
